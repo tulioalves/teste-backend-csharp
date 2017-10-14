@@ -8,6 +8,7 @@ using Infrastructure.TorreHanoi.ImagemHelper;
 using Infrastructure.TorreHanoi.Log;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Infrastructure.TorreHanoi.ImagemHelper.Dto;
 
 namespace Tests.TorreHanoi.Application
 {
@@ -25,8 +26,11 @@ namespace Tests.TorreHanoi.Application
             mockLogger.Setup(s => s.Logar(It.IsAny<string>(), It.IsAny<TipoLog>()));
 
             var mockDesignerService = new Mock<IDesignerService>();
+			mockDesignerService.Setup(s => s.Inicializar(It.IsAny<TorreHanoiDto>()));
+			mockDesignerService.Setup(s => s.Desenhar()).Returns(new System.Drawing.Bitmap(10, 10));
 
-            var mockTorreHanoiDomainService = new Mock<ITorreHanoiDomainService>();
+
+			var mockTorreHanoiDomainService = new Mock<ITorreHanoiDomainService>();
             mockTorreHanoiDomainService.Setup(s => s.Criar(It.IsAny<int>())).Returns(Guid.NewGuid);
             mockTorreHanoiDomainService.Setup(s => s.ObterPor(It.IsAny<Guid>())).Returns(() => new global::Domain.TorreHanoi.TorreHanoi(3, mockLogger.Object));
             mockTorreHanoiDomainService.Setup(s => s.ObterTodos()).Returns(() => new List<global::Domain.TorreHanoi.TorreHanoi> { new global::Domain.TorreHanoi.TorreHanoi(3, mockLogger.Object) });
@@ -79,7 +83,13 @@ namespace Tests.TorreHanoi.Application
         [TestCategory(CategoriaTeste)]
         public void ObterImagemProcessoPor_Deve_Retornar_Imagem()
         {
-            Assert.Fail();
-        }
+			var response = _service.ObterImagemProcessoPor(Guid.NewGuid().ToString());
+
+			Assert.IsNotNull(response);
+			Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+			Assert.IsNotNull(response.Imagem);
+			Assert.IsTrue(response.IsValid);
+			Assert.IsTrue(response.MensagensDeErro.Count == 0);
+		}
     }
 }
